@@ -34,16 +34,21 @@ class ViewController: UICollectionViewController {
         let picture = pictures[indexPath.row]
         cell.imageView.image = UIImage(named: picture)
         cell.textLabel?.text = picture
+        cell.subtitleLabel.text = "Shown: \(timesShown(picture)) times"
         return cell
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if let vc = storyboard?.instantiateViewController(withIdentifier: "Detail") as? DetailViewController {
+            imageIsShown(pictures[indexPath.row])
+            
             vc.selectedImage = pictures[indexPath.row]
             vc.position = indexPath.row + 1
             vc.totalNumber = pictures.count
             navigationController?.pushViewController(vc, animated: true)
         }
+        
+        collectionView.performSelector(onMainThread: #selector(UICollectionView.reloadData), with: nil, waitUntilDone: false)
     }
     
     @objc func shareTapped() {
@@ -67,6 +72,16 @@ class ViewController: UICollectionViewController {
         pictures.sort()
         collectionView.performSelector(onMainThread: #selector(UICollectionView.reloadData), with: nil, waitUntilDone: false)
         print(pictures)
+    }
+    
+    func imageIsShown(_ image: String) {
+        let defaults = UserDefaults.standard
+        let count = defaults.integer(forKey: image)
+        defaults.set(count + 1, forKey: image)
+    }
+    
+    func timesShown(_ image: String) -> Int {
+        UserDefaults.standard.integer(forKey: image)
     }
 }
 
